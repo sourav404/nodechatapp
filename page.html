@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Socket.IO chat</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <style>
+      html {
+  scroll-behavior: smooth;
+}
+     *{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: monospace;
+     }
+     *:focus{
+      outline: none;
+     }
+      body{
+        width: 100vw;
+        height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      }
+      .chatbox{
+        width: 400px;
+        height: 80vh;
+        background: #E8E7E7;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+      }
+      .nav{
+        width: 100%;
+        height: 50px;
+        background: #3264BB;
+        display: flex;
+        justify-content: space-between;
+       padding: 0px 20px;
+        align-items: center;
+        color: #fff;
+        font-weight: bold;
+      }
+#messages{
+  padding: 10px;
+  list-style: none;
+  /*border: 1px solid;*/
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+
+}
+#messages li{
+
+margin: 10px 0px;
+padding: 10px;
+background-color: #fff;
+float: right;
+/*border-radius: 20px;*/
+}
+.join{
+  margin: 10px 0px;
+padding: 5px 10px;
+/*background-color: gray;*/
+text-align: center;
+color: gray;
+font-size: 17px;
+/*border-radius: 20px;*/
+}
+#form{
+width: 100%;
+height: 50px;
+background: #E8E7E7;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0px 20px;
+}
+#input{
+  width: 100%;
+  height: 90%;
+  border: none;
+  background-color: transparent;
+
+}
+#btn{
+  background: #3264BB;
+   width: 80px;
+  height: 80%;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+}
+.user{
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+
+
+@media only screen and (max-width: 500px) {
+  .nav{
+    position: fixed;
+    top: 0;
+  }
+ .chatbox{
+        width: 100%;
+        height: 100%;
+        border: 1px solid;
+      }
+      #form{
+        position: fixed;
+        bottom: 0;
+      }
+      #messages{
+        margin-bottom: 60px;
+        margin-top: 40px;
+      }
+}
+
+    </style>
+  </head>
+  <body>
+
+    <div class="chatbox">
+      <div class="nav">
+        <h3>ChatBAr</h3>
+        <p class="tit">Hello, User</p>
+        <p id="count">0 Online</p>
+      </div>
+      <ul id="messages"></ul>
+      
+      <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Meggasge" />
+      </form>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+
+
+   var user = prompt("Your Name");
+  
+while (user == null || user == '') {
+   var user = prompt("Your Name");
+ 
+}
+
+// var user = 'sourav Bapari'
+
+$('.nav .tit').html(user);
+  var socket = io();
+
+
+socket.emit('join',user);
+socket.emit('exituser',user);
+
+socket.on('count', function(msg){
+$('#count').html(`${msg} Online</div>`);
+})
+
+
+
+
+socket.on('addjoin', function(msg){
+  if (msg == user) {
+    msg = 'You'
+  }
+$('#messages').append(`<div class='join'>${msg} Join In Chat</div>`);
+})
+
+
+$('#form').submit((e)=>{
+  e.preventDefault();
+const inp = $('#input').val();
+
+if (inp) {
+  socket.emit('user',{"Name":user,"msg":inp});
+  $('#input').val('');
+}
+
+
+
+
+})
+
+ socket.on('chat', function(msg) {
+  if (msg.Name == user) {
+var css = 'background-color:#4C6EF8;color:#fff';
+  }else {
+    css = '';
+  }
+ $('#messages').append(`<li style = '${css}'><div class='user' >${msg.Name}</div><div  class='chat'>${msg.msg}</div></li>`)
+ $('#messages').scrollTop($('#messages')[0].scrollHeight);
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+</script>
+  </body>
+</html>
